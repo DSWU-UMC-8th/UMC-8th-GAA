@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="song_progress">#1b4cd4</color>
+    <color name="song_bg">#b3b6c1</color>
+    <color name="gray">#9ba0af</color>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.week3.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_home_to_album"
+            app:destination="@id/albumFragment" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/recordFragment"
+        android:name="com.example.week3.RecordFragment"
+        android:label="record"
+        tools:layout="@layout/fragment_record" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.week3.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.week3.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/albumFragment"
+        android:name="com.example.week3.AlbumFragment"
+        android:label="Detail"
+        tools:layout="@layout/fragment_album"/>
+</navigation>
