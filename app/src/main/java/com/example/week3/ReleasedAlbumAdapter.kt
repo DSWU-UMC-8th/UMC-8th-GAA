@@ -12,22 +12,32 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.example.week3.databinding.LayoutReleasedBinding
 
 class ReleasedAlbumAdapter (
     private val dataSet: Array<AlbumInfo>,
-    private val fragment: Fragment
+    private val fragment: Fragment,
+    private val listener: OnItemButtonClickListener
 ): RecyclerView.Adapter<ReleasedAlbumAdapter.ViewHolder> () {
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val albumArt: ImageView = view.findViewById(R.id.released_albumart)
-        val title: TextView = view.findViewById(R.id.released_title)
-        val artist: TextView = view.findViewById(R.id.released_artist)
+    inner class ViewHolder(binding: LayoutReleasedBinding) : RecyclerView.ViewHolder(binding.root) {
+        init {
+            binding.releasedPlayBtn.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    listener.onButtonClick(position)
+                }
+            }
+        }
+        val albumArt: ImageView = binding.releasedAlbumart
+        val title: TextView = binding.releasedTitle
+        val artist: TextView = binding.releasedArtist
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.layout_released, parent, false)
+        val binding = LayoutReleasedBinding.inflate(LayoutInflater.from(parent.context), parent, false)
 
-        return ViewHolder(view)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -57,5 +67,9 @@ class ReleasedAlbumAdapter (
     }
 
     override fun getItemCount() = dataSet.size
+
+    interface OnItemButtonClickListener {
+        fun onButtonClick(position: Int)
+    }
 
 }

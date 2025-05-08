@@ -12,7 +12,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.week3.databinding.FragmentHomeBinding
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -22,6 +22,8 @@ class HomeFragment : Fragment() {
     private val sliderHandler = Handler(Looper.getMainLooper())
     private val slideDelay: Long = 3000
 
+    private var albumList = arrayOf<AlbumInfo>()
+
     private val sliderRunnable = object : Runnable {
         override fun run() {
             val viewPager = binding.recommendBannerViewPager
@@ -29,10 +31,6 @@ class HomeFragment : Fragment() {
             viewPager.setCurrentItem(nextItem, true)
             sliderHandler.postDelayed(this, slideDelay)
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -70,14 +68,14 @@ class HomeFragment : Fragment() {
 
 
         // releasedAlbum
-        val albumList = arrayOf(
+        albumList = arrayOf(
             AlbumInfo(R.drawable.album, "Album 1", "Artist 1"),
             AlbumInfo(R.drawable.album, "Album 2", "Artist 2"),
             AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
         )
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerView.adapter = ReleasedAlbumAdapter(albumList, this)
+        binding.recyclerView.adapter = ReleasedAlbumAdapter(albumList, this, this)
     }
 
     override fun onResume() {
@@ -94,5 +92,11 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
         _binding = null
         sliderHandler.removeCallbacks(sliderRunnable)
+    }
+
+    override fun onButtonClick(position: Int) {
+        val song = albumList[position].trackList[0]
+        val activity = activity as? MainActivity
+        activity?.setMiniPlayer(song)
     }
 }

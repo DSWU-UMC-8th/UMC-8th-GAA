@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.week3.databinding.FragmentProfileBinding
 
-class ProfileFragment : Fragment() {
+class ProfileFragment : Fragment(), StorageAdapter.OnItemButtonClickListener {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+    private var storageList = mutableListOf<Song>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,7 +25,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val storageList = arrayOf(
+        storageList = mutableListOf(
             Song("노래", "가수", R.drawable.album),
             Song("노래2", "가수2", R.drawable.album),
             Song("노래3", "가수3", R.drawable.album),
@@ -39,6 +40,11 @@ class ProfileFragment : Fragment() {
 
         binding.storageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.storageRecyclerView.adapter = StorageAdapter(storageList, this)
+    }
+
+    override fun onButtonClick(position: Int) {
+        storageList.removeAt(position)
+        binding.storageRecyclerView.adapter?.notifyItemRemoved(position)
     }
 
 }

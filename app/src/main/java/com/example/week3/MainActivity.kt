@@ -160,4 +160,12 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
+
+    fun setMiniPlayer(selectedSong: Song) {
+        song.isPlaying = true
+        startTimer()
+        binding.songTitleTV.text = selectedSong.title
+        binding.artistTV.text = selectedSong.artist
+        song = selectedSong
+    }
 }
