@@ -14,6 +14,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.week3.databinding.ActivityMainBinding
+import com.google.gson.Gson
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +25,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var song: Song
     private lateinit var timer: Timer
+
+    private var gson: Gson = Gson()
 
     private val getResultText = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -48,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         setBottomNavi()
-        setSample()
+        //setSample()
+        inputDummySongs()
 
         binding.miniPlayBtn.setOnClickListener {
             song.isPlaying = true
@@ -56,18 +60,49 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.miniPlayer.setOnClickListener {
-            song.second = (timer.mills / 1000).toInt()
-            val intent = Intent(this, SongActivity::class.java).apply {
-                putExtra("title", song.title)
-                putExtra("artist", song.artist)
-                putExtra("albumArt", song.albumArt)
-                putExtra("second", song.second)
-                putExtra("playTime", song.playTime)
-                putExtra("isPlaying", song.isPlaying)
-            }
-            getResultText.launch(intent)
+            val editor = getSharedPreferences("song", MODE_PRIVATE).edit()
+            editor.putInt("songId", song.id)
+            editor.apply()
+
+            val intent = Intent(this, SongActivity::class.java)
+            startActivity(intent)
+
+//            song.second = (timer.mills / 1000).toInt()
+//            val intent = Intent(this, SongActivity::class.java).apply {
+//                putExtra("title", song.title)
+//                putExtra("artist", song.artist)
+//                putExtra("albumArt", song.albumArt)
+//                putExtra("second", song.second)
+//                putExtra("playTime", song.playTime)
+//                putExtra("isPlaying", song.isPlaying)
+//            }
+//            getResultText.launch(intent)
             //startActivity(intent)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+//        val sharedPreferences = getSharedPreferences("song", MODE_PRIVATE)
+//        val songJson = sharedPreferences.getString("songData", null)
+//
+//        song = if(songJson == null){
+//            Song("라일락", "아이유(IU)", R.drawable.album, 0, 60, false, "music_lilac")
+//        } else {
+//            gson.fromJson(songJson, Song::class.java)
+//        }
+
+        val spf = getSharedPreferences("song", MODE_PRIVATE)
+        val songId = spf.getInt("songId", 0)
+
+        val songDB = SongDatabase.getInstance(this)!!
+        song = if (songId == 0){
+            songDB.songDao().getSong(1)
+        } else {
+            songDB.songDao().getSong(songId)
+        }
+
+        setMiniPlayer(song)
     }
 
     override fun onDestroy() {
@@ -84,6 +119,8 @@ class MainActivity : AppCompatActivity() {
             R.drawable.album,
             0,
             60,
+            false,
+            "music_sample",
             false
         )
     }
@@ -162,10 +199,61 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setMiniPlayer(selectedSong: Song) {
-        song.isPlaying = true
-        startTimer()
         binding.songTitleTV.text = selectedSong.title
         binding.artistTV.text = selectedSong.artist
         song = selectedSong
+        binding.miniSeekbar.progress = (song.second*100000)/song.playTime
+    }
+
+    private fun inputDummySongs(){
+        val songDB = SongDatabase.getInstance(this)!!
+        val songs = songDB.songDao().getSongs()
+
+        if (songs.isNotEmpty()) return
+
+        songDB.songDao().insert(
+            Song(
+                "노래1",
+                "가수1",
+                R.drawable.album,
+                0,
+                60,
+                false,
+                "music_sample",
+                false,
+                1
+            )
+        )
+
+        songDB.songDao().insert(
+            Song(
+                "노래2",
+                "가수2",
+                R.drawable.album,
+                0,
+                60,
+                false,
+                "music_sample",
+                false,
+                2
+            )
+        )
+
+        songDB.songDao().insert(
+            Song(
+                "노래3",
+                "가수3",
+                R.drawable.album,
+                0,
+                60,
+                false,
+                "music_sample",
+                false,
+                3
+            )
+        )
+
+        val _songs = songDB.songDao().getSongs()
+        Log.d("DB data", _songs.toString())
     }
 }

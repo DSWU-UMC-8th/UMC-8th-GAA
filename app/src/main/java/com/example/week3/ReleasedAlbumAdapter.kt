@@ -1,5 +1,6 @@
 package com.example.week3
 
+import android.annotation.SuppressLint
 import android.media.Image
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,10 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.week3.databinding.LayoutReleasedBinding
 
 class ReleasedAlbumAdapter (
-    private val dataSet: Array<AlbumInfo>,
     private val fragment: Fragment,
     private val listener: OnItemButtonClickListener
 ): RecyclerView.Adapter<ReleasedAlbumAdapter.ViewHolder> () {
+
+    val dataSet = ArrayList<AlbumInfo>()
 
     inner class ViewHolder(binding: LayoutReleasedBinding) : RecyclerView.ViewHolder(binding.root) {
         init {
@@ -70,6 +72,14 @@ class ReleasedAlbumAdapter (
 
     interface OnItemButtonClickListener {
         fun onButtonClick(position: Int)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun addAlbums(albums: ArrayList<AlbumInfo>) {
+        this.dataSet.clear()
+        this.dataSet.addAll(albums)
+
+        notifyDataSetChanged()
     }
 
 }

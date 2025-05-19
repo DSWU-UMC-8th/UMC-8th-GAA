@@ -13,38 +13,43 @@ class ProfileFragment : Fragment(), StorageAdapter.OnItemButtonClickListener {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private var storageList = mutableListOf<Song>()
+    lateinit var songDB: SongDatabase
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
+
+        songDB = SongDatabase.getInstance(requireContext())!!
+
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        storageList = mutableListOf(
-            Song("노래", "가수", R.drawable.album),
-            Song("노래2", "가수2", R.drawable.album),
-            Song("노래3", "가수3", R.drawable.album),
-            Song("노래4", "가수4", R.drawable.album),
-            Song("노래5", "가수5", R.drawable.album),
-            Song("노래6", "가수6", R.drawable.album),
-            Song("노래7", "가수7", R.drawable.album),
-            Song("노래7", "가수7", R.drawable.album),
-            Song("노래8", "가수8", R.drawable.album),
-            Song("노래9", "가수9", R.drawable.album)
-        )
-
-        binding.storageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.storageRecyclerView.adapter = StorageAdapter(storageList, this)
+    override fun onStart() {
+        super.onStart()
+        initRecyclerView()
     }
 
     override fun onButtonClick(position: Int) {
         storageList.removeAt(position)
         binding.storageRecyclerView.adapter?.notifyItemRemoved(position)
+    }
+
+    private fun initRecyclerView(){
+        binding.storageRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val storageAdapter = StorageAdapter()
+
+        storageAdapter.setMyItemClickListener(object : StorageAdapter.MyItemClickListener{
+            override fun onRemoveSong(songId: Int) {
+                songDB.songDao().updateIsLikeById(false, songId)
+            }
+        })
+
+        binding.storageRecyclerView.adapter = storageAdapter
+
+        storageAdapter.addSongs(songDB.songDao().getLikedSongs(true) as ArrayList<Song>)
     }
 
 }

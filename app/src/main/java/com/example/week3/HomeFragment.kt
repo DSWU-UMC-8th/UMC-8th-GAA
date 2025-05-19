@@ -3,6 +3,7 @@ package com.example.week3
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -22,7 +23,9 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
     private val sliderHandler = Handler(Looper.getMainLooper())
     private val slideDelay: Long = 3000
 
-    private var albumList = arrayOf<AlbumInfo>()
+    //private var albumList = arrayOf<AlbumInfo>()
+    lateinit var albumDB: AlbumDatabase
+
 
     private val sliderRunnable = object : Runnable {
         override fun run() {
@@ -38,8 +41,11 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        albumDB = AlbumDatabase.getInstance(requireContext())!!
+
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,14 +74,13 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
 
 
         // releasedAlbum
-        albumList = arrayOf(
-            AlbumInfo(R.drawable.album, "Album 1", "Artist 1"),
-            AlbumInfo(R.drawable.album, "Album 2", "Artist 2"),
-            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
-        )
-
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-        binding.recyclerView.adapter = ReleasedAlbumAdapter(albumList, this, this)
+//        albumList = arrayOf(
+//            AlbumInfo(R.drawable.album, "Album 1", "Artist 1"),
+//            AlbumInfo(R.drawable.album, "Album 2", "Artist 2"),
+//            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
+//        )
+        inputDummyAlbums()
+        initRecyclerView()
     }
 
     override fun onResume() {
@@ -95,8 +100,42 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
     }
 
     override fun onButtonClick(position: Int) {
-        val song = albumList[position].trackList[0]
+        val albumDB = AlbumDatabase.getInstance(MainActivity())!!
+        val album = albumDB.albumDao().getAlbum(position)
+
+        val songDB = SongDatabase.getInstance(SongActivity())!!
+        val songs = songDB.songDao().getSongsInAlbum(album.id)
         val activity = activity as? MainActivity
-        activity?.setMiniPlayer(song)
+        activity?.setMiniPlayer(songs[0])
+    }
+
+    private fun inputDummyAlbums(){
+        val albumDB = AlbumDatabase.getInstance(requireContext())!!
+        val albums = albumDB.albumDao().getAlbums()
+
+        if (albums.isNotEmpty()) return
+
+        albumDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 1", "Artist 1")
+        )
+
+        albumDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 2", "Artist 2")
+        )
+
+        albumDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
+        )
+
+        val _albums = albumDB.albumDao().getAlbums()
+        Log.d("DB data", _albums.toString())
+    }
+
+    private fun initRecyclerView(){
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        val adapter = ReleasedAlbumAdapter(this, this)
+        binding.recyclerView.adapter = adapter
+
+        adapter.addAlbums(albumDB.albumDao().getAlbums() as ArrayList<AlbumInfo>)
     }
 }
