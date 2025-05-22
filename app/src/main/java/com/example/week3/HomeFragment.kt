@@ -24,7 +24,8 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
     private val slideDelay: Long = 3000
 
     //private var albumList = arrayOf<AlbumInfo>()
-    lateinit var albumDB: AlbumDatabase
+    private lateinit var songDB: SongDatabase
+    private var albumDatas = ArrayList<AlbumInfo>()
 
 
     private val sliderRunnable = object : Runnable {
@@ -41,7 +42,8 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        albumDB = AlbumDatabase.getInstance(requireContext())!!
+        songDB = SongDatabase.getInstance(requireContext())!!
+        albumDatas.addAll(songDB.albumDao().getAlbums())
 
         return binding.root
     }
@@ -79,7 +81,7 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
 //            AlbumInfo(R.drawable.album, "Album 2", "Artist 2"),
 //            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
 //        )
-        inputDummyAlbums()
+        //inputDummyAlbums()
         initRecyclerView()
     }
 
@@ -100,42 +102,41 @@ class HomeFragment : Fragment(), ReleasedAlbumAdapter.OnItemButtonClickListener 
     }
 
     override fun onButtonClick(position: Int) {
-        val albumDB = AlbumDatabase.getInstance(MainActivity())!!
-        val album = albumDB.albumDao().getAlbum(position)
 
         val songDB = SongDatabase.getInstance(SongActivity())!!
+        val album = songDB.albumDao().getAlbum(position)
         val songs = songDB.songDao().getSongsInAlbum(album.id)
         val activity = activity as? MainActivity
         activity?.setMiniPlayer(songs[0])
     }
 
-    private fun inputDummyAlbums(){
-        val albumDB = AlbumDatabase.getInstance(requireContext())!!
-        val albums = albumDB.albumDao().getAlbums()
-
-        if (albums.isNotEmpty()) return
-
-        albumDB.albumDao().insert(
-            AlbumInfo(R.drawable.album, "Album 1", "Artist 1")
-        )
-
-        albumDB.albumDao().insert(
-            AlbumInfo(R.drawable.album, "Album 2", "Artist 2")
-        )
-
-        albumDB.albumDao().insert(
-            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
-        )
-
-        val _albums = albumDB.albumDao().getAlbums()
-        Log.d("DB data", _albums.toString())
-    }
+//    private fun inputDummyAlbums(){
+//        val albumDB = AlbumDatabase.getInstance(requireContext())!!
+//        val albums = albumDB.albumDao().getAlbums()
+//
+//        if (albums.isNotEmpty()) return
+//
+//        albumDB.albumDao().insert(
+//            AlbumInfo(R.drawable.album, "Album 1", "Artist 1")
+//        )
+//
+//        albumDB.albumDao().insert(
+//            AlbumInfo(R.drawable.album, "Album 2", "Artist 2")
+//        )
+//
+//        albumDB.albumDao().insert(
+//            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
+//        )
+//
+//        val _albums = albumDB.albumDao().getAlbums()
+//        Log.d("DB data", _albums.toString())
+//    }
 
     private fun initRecyclerView(){
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         val adapter = ReleasedAlbumAdapter(this, this)
         binding.recyclerView.adapter = adapter
 
-        adapter.addAlbums(albumDB.albumDao().getAlbums() as ArrayList<AlbumInfo>)
+        adapter.addAlbums(songDB.albumDao().getAlbums() as ArrayList<AlbumInfo>)
     }
 }

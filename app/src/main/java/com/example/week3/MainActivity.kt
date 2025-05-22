@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
         setBottomNavi()
         //setSample()
         inputDummySongs()
+        inputDummyAlbums()
 
         binding.miniPlayBtn.setOnClickListener {
             song.isPlaying = true
@@ -255,5 +256,24 @@ class MainActivity : AppCompatActivity() {
 
         val _songs = songDB.songDao().getSongs()
         Log.d("DB data", _songs.toString())
+    }
+
+    private fun inputDummyAlbums() {
+        val songDB = SongDatabase.getInstance(this)!!
+        val albums = songDB.albumDao().getAlbums()
+
+        if (albums.isNotEmpty()) return
+
+        songDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 1", "Artist 1")
+        )
+
+        songDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 2", "Artist 2")
+        )
+
+        songDB.albumDao().insert(
+            AlbumInfo(R.drawable.album, "Album 3", "Artist 3")
+        )
     }
 }
